@@ -1,0 +1,26 @@
+---
+Checks: >
+  -*,
+  bugprone-*,
+  google-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  google-readability-todo
+  -readability-*,
+  -modernize-use-trailing-return-type,
+  -bugprone-easily-swappable-parameters,
+
+CheckOptions:
+  - key:             misc-const-correctness.AnalyzeValues
+    value:           'true'
+  - key:             misc-const-correctness.TransformValues
+    value:           'true'
+    
+  - key:             readability-function-cognitive-complexity.Threshold
+    value:           '25'
+
+HeaderFilterRegex: .*
+
+WarningsAsErrors: ''
+...

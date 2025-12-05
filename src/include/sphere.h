@@ -1,0 +1,44 @@
+#ifndef SPHERE_H
+#define SPHERE_H
+
+#include "hittable.h"
+#include "vec3.h"
+
+namespace raytracer {
+
+class sphere : public hittable {
+ public:
+  sphere(const point3& center, const double radius) : center_{center}, radius_{radius} {}
+
+  bool hit(const ray& r, double ray_tmin, double ray_tmax, hit_record& rec) const override {
+    vec3 oc = center_ - r.origin();
+    const auto a = r.direction().length_squared();
+    const auto h = dot(r.direction(), oc);
+    const auto c = oc.length_squared() - radius_ * radius_;
+    const auto discriminant = h * h - a * c;
+    if (discriminant < 0.0) {
+      return false;
+    }
+    const auto sqrtd = std::sqrt(discriminant);
+    auto root = (h - sqrtd) / a;
+    if (root <= ray_tmin || root >= ray_tmax) {
+      root = (h + sqrtd) / a;
+      if (root <= ray_tmin || root >= ray_tmax) {
+        return false;
+      }
+    }
+    rec.t = root;
+    rec.p = r.at(rec.t);
+    vec3 outward_normal = (rec.p - center_) / radius_;
+    rec.set_face_normal(r, outward_normal);
+    return true;
+  }
+
+ private:
+  point3 center_{};
+  double radius_{};
+};
+
+}  // namespace raytracer
+
+#endif

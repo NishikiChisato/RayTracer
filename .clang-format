@@ -1,0 +1,12 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+
+ColumnLimit: 100
+
+AccessModifierOffset: -1
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortLambdasOnASingleLine: All
+SortIncludes: true
+
+IncludeBlocks: Regroup
