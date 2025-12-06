@@ -5,50 +5,55 @@
 #include <cmath>
 #include <format>
 
+#include "rt.h"
+
 namespace raytracer {
 
 class vec3 {
  private:
-  std::array<double, 3> e_{};
+  double x_;
+  double y_;
+  double z_;
 
  public:
   constexpr vec3() = default;
-  constexpr vec3(const double xcord, const double ycord, const double zcord)
-      : e_{xcord, ycord, zcord} {}
+  constexpr vec3(const double x, const double y, const double z) : x_{x}, y_{y}, z_{z} {}
 
   [[nodiscard]] constexpr double x() const {
-    return e_[0];
+    return x_;
   }
   [[nodiscard]] constexpr double y() const {
-    return e_[1];
+    return y_;
   }
   [[nodiscard]] constexpr double z() const {
-    return e_[2];
+    return z_;
   }
 
   [[nodiscard]] constexpr double length_squared() const {
-    return (e_[0] * e_[0]) + (e_[1] * e_[1]) + (e_[2] * e_[2]);
+    return (x_ * x_) + (y_ * y_) + (z_ * z_);
   }
 
   [[nodiscard]] constexpr double length() const {
     return std::sqrt(length_squared());
   }
 
+  static vec3 random() {
+    return vec3{random_double(), random_double(), random_double()};
+  }
+
+  static vec3 random(const double min, const double max) {
+    return vec3{random_double(min, max), random_double(min, max), random_double(min, max)};
+  }
+
   constexpr vec3 operator-() const {
-    return vec3{-e_[0], -e_[1], -e_[2]};
-  }
-  constexpr double operator[](std::ptrdiff_t idx) const {
-    return e_[idx];
-  }
-  constexpr double& operator[](std::ptrdiff_t idx) {
-    return e_[idx];
+    return vec3{-x_, -y_, -z_};
   }
 
   constexpr vec3& operator+=(const vec3& rhs) {
-    return (e_[0] += rhs[0], e_[1] += rhs[1], e_[2] += rhs[2], *this);
+    return (x_ += rhs.x(), y_ += rhs.y(), z_ += rhs.z(), *this);
   }
   constexpr vec3& operator*=(const double rhs) {
-    return (e_[0] *= rhs, e_[1] *= rhs, e_[2] *= rhs, *this);
+    return (x_ *= rhs, y_ *= rhs, z_ *= rhs, *this);
   }
   constexpr vec3& operator/=(const double rhs) {
     return *this *= (1 / rhs);
@@ -56,19 +61,19 @@ class vec3 {
 };
 
 constexpr vec3 operator+(const vec3& lhs, const vec3& rhs) {
-  return vec3{lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2]};
+  return vec3{lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z()};
 }
 
 constexpr vec3 operator-(const vec3& lhs, const vec3& rhs) {
-  return vec3{lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2]};
+  return vec3{lhs.x() - rhs.x(), lhs.y() - rhs.y(), lhs.z() - rhs.z()};
 }
 
 constexpr vec3 operator*(const vec3& lhs, const vec3& rhs) {
-  return vec3{lhs[0] * rhs[0], lhs[1] * rhs[1], lhs[2] * rhs[2]};
+  return vec3{lhs.x() * rhs.x(), lhs.y() * rhs.y(), lhs.z() * rhs.z()};
 }
 
 constexpr vec3 operator*(const double lhs, const vec3& rhs) {
-  return vec3{lhs * rhs[0], lhs * rhs[1], lhs * rhs[2]};
+  return vec3{lhs * rhs.x(), lhs * rhs.y(), lhs * rhs.z()};
 }
 
 constexpr vec3 operator*(const vec3& lhs, const double rhs) {
@@ -80,16 +85,34 @@ constexpr vec3 operator/(const vec3& lhs, const double rhs) {
 }
 
 constexpr double dot(const vec3& lhs, const vec3& rhs) {
-  return (lhs[0] * rhs[0]) + (lhs[1] * rhs[1]) + (lhs[2] * rhs[2]);
+  return (lhs.x() * rhs.x()) + (lhs.y() * rhs.y()) + (lhs.z() * rhs.z());
 }
 
 constexpr vec3 cross(const vec3& lhs, const vec3& rhs) {
-  return vec3{(lhs[1] * rhs[2]) - (lhs[2] * rhs[1]), (lhs[2] * rhs[0]) - (lhs[0] * rhs[2]),
-              (lhs[0] * rhs[1]) - (lhs[1] * rhs[0])};
+  return vec3{(lhs.y() * rhs.z()) - (lhs.z() * rhs.y()), (lhs.z() * rhs.x()) - (lhs.x() * rhs.z()),
+              (lhs.x() * rhs.y()) - (lhs.y() * rhs.x())};
 }
 
 constexpr vec3 unit_vec(const vec3& vec) {
   return vec / vec.length();
+}
+
+inline vec3 random_unit_vector() {
+  while (true) {
+    auto p = vec3::random(-1, 1);
+    auto lensq = p.length_squared();
+    if (lensq > 1e-160 && lensq <= 1) {
+      return p / std::sqrt(lensq);
+    }
+  }
+}
+
+inline vec3 random_on_hemisphere(const vec3& normal) {
+  auto on_sphere_vec = random_unit_vector();
+  if (dot(on_sphere_vec, normal) > 0) {
+    return on_sphere_vec;
+  }
+  return -on_sphere_vec;
 }
 
 using point3 = vec3;
@@ -115,7 +138,7 @@ struct std::formatter<raytracer::vec3> {
 
   template <typename FormatContext>
   constexpr FormatContext::iterator format(const raytracer::vec3& vec, FormatContext& ctx) const {
-    return std::format_to(ctx.out(), "{} {} {}", vec[0], vec[1], vec[2]);
+    return std::format_to(ctx.out(), "{} {} {}", vec.x(), vec.y(), vec.z());
   }
 };
 
@@ -133,7 +156,8 @@ struct std::formatter<raytracer::as_point3> {
   template <typename FormatContext>
   constexpr FormatContext::iterator format(const raytracer::as_point3& point,
                                            FormatContext& ctx) const {
-    return std::format_to(ctx.out(), "({}, {}, {})", point.ref_[0], point.ref_[1], point.ref_[2]);
+    return std::format_to(ctx.out(), "({}, {}, {})", point.ref_.x(), point.ref_.y(),
+                          point.ref_.z());
   }
 };
 

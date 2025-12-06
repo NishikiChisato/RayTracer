@@ -1,6 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include "interval.h"
 #include "vec3.h"
 
 namespace raytracer {
@@ -12,6 +13,13 @@ struct as_color {
 
   [[maybe_unused]] const color& ref_;  // NOLINT
 };
+
+inline double linear2gamma(double linear) {
+  if (linear > 0) {
+    return std::sqrt(linear);
+  }
+  return linear;
+}
 
 }  // namespace raytracer
 
@@ -30,10 +38,16 @@ struct std::formatter<raytracer::as_color> {
   constexpr FormatContext::iterator format(const raytracer::as_color& color,
                                            FormatContext& ctx) const {
     const auto& ref = color.ref_;
-    const auto raspect = static_cast<char>(255.999 * ref.x());
-    const auto gaspect = static_cast<char>(255.999 * ref.y());
-    const auto baspect = static_cast<char>(255.999 * ref.z());
-    return std::format_to(ctx.out(), "{}{}{}", raspect, gaspect, baspect);
+
+    const auto x = raytracer::linear2gamma(ref.x());
+    const auto y = raytracer::linear2gamma(ref.y());
+    const auto z = raytracer::linear2gamma(ref.z());
+
+    static const raytracer::interval intensity{0.000, 0.999};
+    const auto raspect = static_cast<int>(256 * intensity.clamp(x));
+    const auto gaspect = static_cast<int>(256 * intensity.clamp(y));
+    const auto baspect = static_cast<int>(256 * intensity.clamp(z));
+    return std::format_to(ctx.out(), "{} {} {}", raspect, gaspect, baspect);
   }
 };
 

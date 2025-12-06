@@ -70,18 +70,18 @@ struct std::formatter<raytracer::utility::styled> {
 
 namespace raytracer::utility {
 // timer
-class Timer {
+class timer {
  public:
-  Timer() : start_{Clock::now()}, last_{Clock::now()} {}
+  timer() : start_{clock::now()}, last_{clock::now()} {}
 
   void reset() {
-    last_ = Clock::now();
+    last_ = clock::now();
   }
   [[nodiscard]] double elapsedFromStart() const {
-    return std::chrono::duration_cast<Second>(Clock::now() - start_).count();
+    return std::chrono::duration_cast<second>(clock::now() - start_).count();
   }
   [[nodiscard]] double elapsedFromLast() const {
-    return std::chrono::duration_cast<Second>(Clock::now() - last_).count();
+    return std::chrono::duration_cast<second>(clock::now() - last_).count();
   }
   void report(std::string_view sv = "") {
     constexpr static std::string_view prefix{"[Timer]: [Elapsed]: {:.4f}, [Delta]: {:.4f}"};
@@ -91,10 +91,10 @@ class Timer {
   }
 
  private:
-  using Clock = std::chrono::high_resolution_clock;
-  using Second = std::chrono::duration<double, std::ratio<1>>;
-  std::chrono::time_point<Clock> start_{Clock::now()};
-  std::chrono::time_point<Clock> last_{Clock::now()};
+  using clock = std::chrono::high_resolution_clock;
+  using second = std::chrono::duration<double, std::ratio<1>>;
+  std::chrono::time_point<clock> start_{clock::now()};
+  std::chrono::time_point<clock> last_{clock::now()};
 };
 
 }  // namespace raytracer::utility
