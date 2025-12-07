@@ -4,10 +4,8 @@
 #include "include/material.h"
 #include "include/rt.h"
 #include "include/sphere.h"
-#include "include/timer.h"
 
 namespace rt = raytracer;
-namespace rtut = raytracer::utility;
 
 namespace {
 bool check_distance(const rt::point3& center, const rt::point3& other, double dis) {
@@ -18,15 +16,15 @@ bool check_distance(const rt::point3& center, const rt::point3& other, double di
 int main() {
   rt::options opts{};
   opts.aspect_ratio_ = 16.0 / 9.0;
-  opts.image_width_ = 6400;
-  opts.samples_per_pixel_ = 1000;
+  opts.image_width_ = 1600;
+  opts.samples_per_pixel_ = 250;
   opts.max_depth_ = 50;
   opts.vfov_ = 25;
-  opts.lookfrom_ = rt::vec3{13, 2, 6};
+  opts.lookfrom_ = rt::vec3{11, 3, 8};
   opts.lookat_ = rt::vec3{0, 0, 0};
   opts.vup_ = rt::vec3{0, 1, 0};
-  opts.defocus_angle_ = 0.3;
-  opts.focus_dis_ = 13;
+  opts.defocus_angle_ = 0.1;
+  opts.focus_dis_ = 12;
 
   rt::camera camera{opts};
 
@@ -39,22 +37,24 @@ int main() {
   // special sphere
   constexpr int sphere_height{1};
   constexpr int sphere_radius{1};
-  constexpr rt::point3 special_point1{4, sphere_height, 0};   // mental
-  constexpr rt::point3 special_point2{0, sphere_height, 0};   // dielectric
-  constexpr rt::point3 special_point3{-4, sphere_height, 0};  // lambertian
-  constexpr rt::point3 special_point4{0, sphere_height, 4};   // hollow glass
-  constexpr rt::point3 special_point5{0, sphere_height, 4};   // hollow glass
+  constexpr rt::point3 special_point1{3.5, sphere_height, 0};  // mental
+  constexpr rt::point3 special_point2{0, sphere_height, 0};    // dielectric
+  constexpr rt::point3 special_point3{-4, sphere_height, 0};   // lambertian
+  constexpr rt::point3 special_point4{0, sphere_height, 4};    // hollow glass
+  constexpr rt::point3 special_point5{0, sphere_height, 4};    // hollow glass
 
-  constexpr int grid_x{11};
-  constexpr int grid_z{11};
+  constexpr int grid_x{16};
+  constexpr int grid_z{16};
   constexpr double obj_r{0.2};
 
   for (int a = -grid_x; a < grid_x; a++) {
     for (int b = -grid_z; b < grid_z; b++) {
       const auto random_material = rt::random_double();
-      rt::point3 center{a + 0.9 * rt::random_double(), obj_r, b * 0.9 * rt::random_double()};
-      if (check_distance(special_point1, center, 1) && check_distance(special_point2, center, 1) &&
-          check_distance(special_point3, center, 1) && check_distance(special_point4, center, 1)) {
+      rt::point3 center{a + 0.8 * rt::random_double(), obj_r, b + 0.8 * rt::random_double()};
+      if (check_distance(special_point1, center, sphere_radius + obj_r) &&
+          check_distance(special_point2, center, sphere_radius + obj_r) &&
+          check_distance(special_point3, center, sphere_radius + obj_r) &&
+          check_distance(special_point4, center, sphere_radius + obj_r)) {
         std::shared_ptr<rt::material> sphere_material{};
         if (random_material < 0.7) {
           // diffuse(even reflection)
@@ -84,7 +84,8 @@ int main() {
   world.add(std::make_shared<rt::sphere>(special_point3, sphere_radius, material3));
   const auto material4 = std::make_shared<rt::dielectric>(1.5);
   world.add(std::make_shared<rt::sphere>(special_point4, sphere_radius, material4));
-  world.add(std::make_shared<rt::sphere>(special_point5, sphere_radius - 0.2, material4));
+  const auto material5 = std::make_shared<rt::dielectric>(1 / 1.5);
+  world.add(std::make_shared<rt::sphere>(special_point5, sphere_radius - 0.2, material5));
 
   camera.render(world);
 
