@@ -37,6 +37,11 @@ class vec3 {
     return std::sqrt(length_squared());
   }
 
+  [[nodiscard]] bool near_zero() const {
+    const auto eps{1e-8};
+    return (std::fabs(x_) < eps) && (std::fabs(y_) < eps) && (std::fabs(z_) < eps);
+  }
+
   static vec3 random() {
     return vec3{random_double(), random_double(), random_double()};
   }
@@ -97,6 +102,15 @@ constexpr vec3 unit_vec(const vec3& vec) {
   return vec / vec.length();
 }
 
+inline vec3 random_in_unit_disk() {
+  while (true) {
+    auto p = vec3{random_double(-1, 1), random_double(-1, 1), 0};
+    if (p.length_squared() < 1) {
+      return p;
+    }
+  }
+}
+
 inline vec3 random_unit_vector() {
   while (true) {
     auto p = vec3::random(-1, 1);
@@ -113,6 +127,19 @@ inline vec3 random_on_hemisphere(const vec3& normal) {
     return on_sphere_vec;
   }
   return -on_sphere_vec;
+}
+
+// computing reflection ray of incident ray
+inline vec3 reflect(const vec3& incident, const vec3& normal) {
+  return incident - 2 * dot(incident, normal) * normal;
+}
+
+inline vec3 refract(const vec3& incident, const vec3& normal, double etai_over_etat) {
+  const double cos_theta = std::fmin(dot(-incident, normal), 1.0);
+  const vec3 out_perpendicular = etai_over_etat * (incident + cos_theta * normal);
+  const vec3 out_parallel =
+      -std::sqrt(std::fabs(1.0 - out_perpendicular.length_squared())) * normal;
+  return out_perpendicular + out_parallel;
 }
 
 using point3 = vec3;

@@ -30,7 +30,7 @@ class hittable_list : public hittable {
     for (const auto& obj : objects_) {
       if (obj->hit(r, interval{ray_t.min(), closest_t}, tmp_rec)) {
         hit_anything = true;
-        closest_t = tmp_rec.t;
+        closest_t = tmp_rec.t_;
         rec = tmp_rec;
       }
     }

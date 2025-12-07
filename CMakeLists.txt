@@ -34,9 +34,7 @@ add_compile_options(-stdlib=libc++)
 add_link_options(-stdlib=libc++ -lc++abi)
 
 
-include_directories(
-  "${PROJECT_BINARY_DIR}/include"
-)
+include_directories("${PROJECT_BINARY_DIR}/include")
 
 add_executable(raytracer)
 target_sources(raytracer

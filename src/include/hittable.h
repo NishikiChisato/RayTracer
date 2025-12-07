@@ -6,15 +6,18 @@
 
 namespace raytracer {
 
+class material;
+
 struct hit_record {
-  point3 p{};         // NOLINT
-  vec3 normal{};      // NOLINT
-  double t{};         // NOLINT
-  bool front_face{};  // NOLINT
+  point3 p_{};                            // NOLINT
+  vec3 normal_{};                         // NOLINT
+  std::shared_ptr<material> material_{};  // NOLINT
+  double t_{};                            // NOLINT
+  bool front_face_{};                     // NOLINT
 
   void set_face_normal(const ray& r, const vec3& outward_normal) {
-    front_face = dot(r.direction(), outward_normal) < 0;
-    normal = front_face ? outward_normal : -outward_normal;
+    front_face_ = dot(r.direction(), outward_normal) < 0;
+    normal_ = front_face_ ? outward_normal : -outward_normal;
   }
 };
 
